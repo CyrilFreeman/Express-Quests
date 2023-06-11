@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const { hashPassword } = require("./auth.js");
+const { hashPassword, verifyPassword, verifyToken } = require("./auth"); // don't forget to import
 const app = express();
 app.use(express.json());
 
@@ -20,21 +20,21 @@ app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.get("/api/users", usersHandlers.getUsers);
 app.get("/api/users/:id", usersHandlers.getUsersById);
 
-app.post("/api/movies", movieHandlers.postMovie);
-//app.post("/api/users", usersHandlers.postUsers);
 app.post("/api/users", hashPassword, usersHandlers.postUsers);
 
+app.post(
+  "/api/login",
+
+  usersHandlers.getUserByEmailWithPasswordAndPassToNext,
+
+  verifyPassword
+);
+
+app.use(verifyToken);
+
+app.post("/api/movies", movieHandlers.postMovie);
 app.put("/api/movies/:id", movieHandlers.updateMovie);
-//app.put("/api/users/:id", usersHandlers.updateUsers);
 app.put("/api/users/:id", hashPassword, usersHandlers.updateUsers);
 
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 app.delete("/api/users/:id", usersHandlers.deleteUsers);
-
-app.listen(port, (err) => {
-  if (err) {
-    console.error("Something bad happened");
-  } else {
-    console.log(`Server is listening on ${port}`);
-  }
-});
